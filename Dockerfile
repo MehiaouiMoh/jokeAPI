@@ -24,4 +24,4 @@ RUN apt-get update -q && \
 COPY --from=build /app/.build/release/VaporToolbox /usr/bin/VaporToolbox
 
 # Lancer le serveur Vapor automatiquement
-CMD ["/usr/bin/VaporToolbox", "serve", "--hostname", "0.0.0.0", "--port", "8080"]
+CMD ["/Sources/VaporToolbox", "serve", "--hostname", "0.0.0.0", "--port", "8080"]
