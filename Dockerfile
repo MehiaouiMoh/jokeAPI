@@ -1,21 +1,26 @@
-FROM swift:6.0-jammy as build
-WORKDIR /build
-COPY . .
-RUN swift build --build-path /build/.build --static-swift-stdlib -c release
+# Étape 1 : build avec Swift officiel (ARM64)
+FROM --platform=linux/arm64 swift:6.0-jammy AS build
+WORKDIR /app
 
-# Étape runtime : Ubuntu Jammy au lieu de Focal
+# Copier tous les fichiers du projet
+COPY . .
+
+# Build en release avec stdlib statique
+RUN swift build --build-path /app/.build --static-swift-stdlib -c release && \
+    ls -l /app/.build/release   # Vérifie le binaire généré
+
+# Étape 2 : runtime léger basé sur Ubuntu Jammy
 FROM ubuntu:22.04
-RUN export DEBIAN_FRONTEND=noninteractive && \
-    apt-get update -q && apt-get upgrade -y -q && \
-    apt-get install -y --no-install-recommends git ca-certificates && \
+WORKDIR /app
+
+# Installer les dépendances nécessaires pour l'exécutable
+RUN apt-get update -q && \
+    apt-get upgrade -y -q && \
+    apt-get install -y --no-install-recommends git ca-certificates libatomic1 && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=build /build/.build/release/vapor /usr/bin
+# Copier le binaire compilé depuis l'étape build
+COPY --from=build /app/.build/release/VaporToolbox /usr/bin/VaporToolbox
 
-RUN swift build --build-path /app/.build --static-swift-stdlib -c release && \
-    ls -l /app/.build/release
-
-RUN git config --global user.name "Vapor"
-RUN git config --global user.email "new@vapor.codes"
-
-CMD ["/app/.build/release/vapor", "serve", "--hostname", "0.0.0.0", "--port", "8080"]
+# Lancer le serveur Vapor automatiquement
+CMD ["/usr/bin/VaporToolbox", "serve", "--hostname", "0.0.0.0", "--port", "8080"]
