@@ -6,8 +6,8 @@ WORKDIR /app
 COPY . .
 
 # Build en release avec stdlib statique
+# Compiler et lister le binaire dans le même RUN
 RUN swift build --build-path /app/.build --static-swift-stdlib -c release && \
-    ls -l /app/.build/release   # Vérifie le binaire généré
     echo "Contenu de /app/.build/release :" && ls -l /app/.build/release
 
 # Étape 2 : runtime léger basé sur Ubuntu Jammy
