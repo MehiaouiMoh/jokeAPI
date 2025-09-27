@@ -3,10 +3,13 @@ WORKDIR /build
 COPY . .
 RUN swift build --build-path /build/.build --static-swift-stdlib -c release
 
-FROM ubuntu:focal
-RUN export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true && \
-    apt-get -q update && apt-get -q upgrade -y && apt-get install -y --no-install-recommends git ca-certificates \
-    && rm -r /var/lib/apt/lists/*
+# Étape runtime : Ubuntu Jammy au lieu de Focal
+FROM ubuntu:22.04
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    apt-get update -q && apt-get upgrade -y -q && \
+    apt-get install -y --no-install-recommends git ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /build/.build/release/vapor /usr/bin
 
 RUN git config --global user.name "Vapor"
