@@ -15,4 +15,4 @@ COPY --from=build /build/.build/release/vapor /usr/bin
 RUN git config --global user.name "Vapor"
 RUN git config --global user.email "new@vapor.codes"
 
-ENTRYPOINT ["vapor"]
+CMD ["/app/.build/release/vapor", "serve", "--hostname", "0.0.0.0", "--port", "8080"]
