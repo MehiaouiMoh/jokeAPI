@@ -12,6 +12,9 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 COPY --from=build /build/.build/release/vapor /usr/bin
 
+RUN swift build --build-path /app/.build --static-swift-stdlib -c release && \
+    ls -l /app/.build/release
+
 RUN git config --global user.name "Vapor"
 RUN git config --global user.email "new@vapor.codes"
 
