@@ -1,27 +1,27 @@
-# Étape 1 : build avec Swift officiel (ARM64)
-FROM --platform=linux/arm64 swift:6.0-jammy AS build
+# Étape 1 : build avec Swift officiel
+FROM swift:6.0-jammy AS build
 WORKDIR /app
 
-# Copier tous les fichiers du projet
+# Copier les fichiers du projet
 COPY . .
 
-# Build en release avec stdlib statique
-# Compiler et lister le binaire dans le même RUN
+# Compiler le projet en release
 RUN swift build --build-path /app/.build --static-swift-stdlib -c release && \
-    echo "Contenu de /app/.build/release :" && ls -l /app/.build/release
+    echo "Contenu du dossier release :" && ls -l /app/.build/release
 
-# Étape 2 : runtime léger basé sur Ubuntu Jammy
+# Étape 2 : image légère pour exécuter l’app
 FROM ubuntu:22.04
 WORKDIR /app
 
-# Installer les dépendances nécessaires pour l'exécutable
+# Installer les dépendances minimales
 RUN apt-get update -q && \
     apt-get upgrade -y -q && \
     apt-get install -y --no-install-recommends git ca-certificates libatomic1 && \
     rm -rf /var/lib/apt/lists/*
 
-# Copier le binaire compilé depuis l'étape build
-COPY --from=build /app/.build/release/VaporToolbox /usr/bin/VaporToolbox
+# Copier le binaire compilé
+COPY --from=build /app/.build/release/vapor /usr/bin/vapor
 
-# Lancer le serveur Vapor automatiquement
-CMD ["/usr/bin/VaporToolbox", "serve", "--hostname", "0.0.0.0", "--port", "8080"]
+# Démarrer le serveur Vapor automatiquement
+CMD ["/usr/bin/vapor", "serve", "--hostname", "0.0.0.0", "--port", "8080"]
+
